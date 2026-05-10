@@ -1,0 +1,40 @@
+{
+  "name": "telegram-codex",
+  "version": "0.1.0",
+  "description": "Run a local Telegram bot bridge that forwards messages to Codex CLI and replies in Telegram.",
+  "author": {
+    "name": "y5mei",
+    "email": "meiyaowen@gmail.com",
+    "url": "https://github.com/y5mei"
+  },
+  "homepage": "https://core.telegram.org/bots/api",
+  "repository": "https://github.com/y5mei/telegram-codex-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "telegram",
+    "bot",
+    "codex",
+    "bridge"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Telegram Codex",
+    "shortDescription": "Chat with local Codex from Telegram.",
+    "longDescription": "Telegram Codex packages a local long-polling bridge that receives messages from an allowlisted Telegram chat, runs Codex CLI locally, and sends the final response back to Telegram.",
+    "developerName": "y5mei",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Automation"
+    ],
+    "websiteURL": "https://core.telegram.org/bots/api",
+    "privacyPolicyURL": "https://telegram.org/privacy",
+    "termsOfServiceURL": "https://telegram.org/tos",
+    "defaultPrompt": [
+      "Set up Telegram access to Codex.",
+      "Run the Telegram Codex bridge.",
+      "Help secure my Telegram Codex bot."
+    ],
+    "brandColor": "#2AABEE"
+  }
+}
