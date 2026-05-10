@@ -39,13 +39,25 @@ The bridge uses Telegram long polling, so it does not need a public webhook URL.
 
 9. Start the bridge:
 
-   ```sh
-   python3 scripts/telegram_codex_bridge.py
+   ```text
+   /telegram_plugin start
    ```
 
 10. Ask the user to message their new Telegram bot.
 11. Confirm the first message causes the bridge to write `TELEGRAM_ALLOWED_CHAT_IDS` into `.env` and reply `Hello world from Codex Telegram plugin.`
 12. Ask the user to send a second message and verify that Codex replies.
+
+## Lifecycle Commands
+
+Use these commands after setup:
+
+```text
+/telegram_plugin start
+/telegram_plugin stop
+/telegram_plugin status
+```
+
+The bridge is long-running. Installing the plugin does not automatically start it. If the bridge is stopped, Telegram cannot receive a local reply because no process is polling Telegram.
 
 ## Security
 

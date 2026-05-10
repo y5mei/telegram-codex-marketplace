@@ -34,15 +34,28 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
 8. Help the user put the token into `.env` as `TELEGRAM_BOT_HTTP_API_TOKEN`.
 9. Start the bridge with:
 
-   ```sh
-   cd <plugin-root>
-   python3 scripts/telegram_codex_bridge.py
+   ```text
+   /telegram_plugin start
    ```
 
 10. Tell the user to message the Telegram bot.
 11. The first chat to message the bot is written to `.env` as `TELEGRAM_ALLOWED_CHAT_IDS`.
     The expected first Telegram reply is `Hello world from Codex Telegram plugin.`
 12. Ask the user to send a second message and verify that Codex replies.
+
+## Lifecycle Commands
+
+The bridge is a long-running local process. Installing the plugin does not automatically start it, and there is no reliable plugin lifecycle hook here for "start with Codex" or "stop with Codex".
+
+Use:
+
+```text
+/telegram_plugin start
+/telegram_plugin stop
+/telegram_plugin status
+```
+
+If the user sends `/stop` to the Telegram bot while the bridge is running, the bot sends a restart hint and exits. If the bridge is already stopped, Telegram cannot send a local notification because no local process is polling Telegram.
 
 ## Security Guidance
 

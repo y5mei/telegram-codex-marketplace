@@ -19,6 +19,10 @@ from pathlib import Path
 TELEGRAM_LIMIT = 3900
 ENV_PATH = Path(".env")
 WELCOME_MESSAGE = "Hello world from Codex Telegram plugin."
+OFFLINE_MESSAGE = (
+    "Telegram Codex bridge is not running. In Codex, type /telegram_plugin start "
+    "or reopen Codex and ask it to start the Telegram plugin."
+)
 
 
 def load_dotenv(path: Path) -> None:
@@ -165,6 +169,10 @@ def run_codex(prompt: str) -> str:
     return output or "Codex finished without a text reply."
 
 
+def should_stop(text: str) -> bool:
+    return text.strip().lower() in {"/stop", "/offline", "/pause"}
+
+
 def extract_message(update: dict) -> tuple[int, str] | None:
     message = update.get("message") or update.get("edited_message")
     if not message:
@@ -209,6 +217,10 @@ def main() -> int:
                 if chat_id not in allowlist:
                     send_message(token, chat_id, "This chat is not authorized for this bot.")
                     continue
+
+                if should_stop(text):
+                    send_message(token, chat_id, OFFLINE_MESSAGE)
+                    return 0
 
                 print(f"Running Codex for chat {chat_id}: {shlex.quote(text[:80])}", flush=True)
                 send_message(token, chat_id, "Working on it...")

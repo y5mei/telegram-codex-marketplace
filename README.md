@@ -12,7 +12,7 @@ Tell users to send this to Codex:
 Please read this link and install the Telegram Codex plugin, then guide me through setup: https://github.com/y5mei/telegram-codex-marketplace
 ```
 
-Codex should then install the plugin, create the config file, guide the user through BotFather, start the bridge, and test the first Telegram message.
+Codex should then install the plugin, create the config file, guide the user through BotFather, start the bridge with `/telegram_plugin start`, and test the first Telegram message.
 
 ## Agent Goal
 
@@ -24,6 +24,7 @@ Guide the user through:
 4. Putting that token into the plugin `.env` file.
 5. Starting the local bridge.
 6. Testing the first Telegram message so the bridge can claim the user's chat.
+7. Teaching the user `/telegram_plugin start`, `/telegram_plugin stop`, and `/telegram_plugin status`.
 
 ## Install The Marketplace
 
@@ -83,7 +84,13 @@ The user should not need to set `TELEGRAM_ALLOWED_CHAT_IDS` manually. On first c
 
 ## Start And Test
 
-Start the bridge from the plugin root:
+Start the bridge with the plugin command:
+
+```text
+/telegram_plugin start
+```
+
+If executing manually, start it from the plugin root:
 
 ```sh
 python3 scripts/telegram_codex_bridge.py
@@ -113,12 +120,39 @@ Then guide the user to:
 
 If the second reply comes back from Codex, setup is complete.
 
+## Bridge Lifecycle
+
+The bridge is a long-running local process. Installing the plugin does not automatically start it, and the current Codex plugin surface does not provide a reliable install-time or Codex-shutdown lifecycle hook for this kind of daemon.
+
+Agents should start it during onboarding by running:
+
+```text
+/telegram_plugin start
+```
+
+Users can later control it with:
+
+```text
+/telegram_plugin status
+/telegram_plugin stop
+/telegram_plugin start
+```
+
+If the bridge is already running and the user sends `/stop` to the Telegram bot, the bridge sends:
+
+```text
+Telegram Codex bridge is not running. In Codex, type /telegram_plugin start or reopen Codex and ask it to start the Telegram plugin.
+```
+
+Then it stops itself. If the bridge is fully stopped or Codex/computer is offline, Telegram cannot receive a local reply because no process is polling Telegram. In that case the user should reopen Codex and type `/telegram_plugin start`.
+
 ## Troubleshooting For Agents
 
 - If Python raises a certificate verification error when calling Telegram, the bridge falls back to `curl`.
 - If Telegram receives huge Codex CLI logs, upgrade the marketplace and restart the bridge; replies should use only Codex's `--output-last-message` result.
 - If Codex reports an unsupported CLI flag, upgrade the marketplace and restart the bridge.
 - If `.env` is missing, recreate it from `scripts/env.example`.
+- If the bridge is stopped, run `/telegram_plugin start`.
 
 ## Security
 
