@@ -16,6 +16,7 @@ from pathlib import Path
 
 
 TELEGRAM_LIMIT = 3900
+ENV_PATH = Path(".env")
 
 
 def load_dotenv(path: Path) -> None:
@@ -36,6 +37,36 @@ def required_env(name: str) -> str:
     if not value:
         raise SystemExit(f"Missing required environment variable: {name}")
     return value
+
+
+def telegram_token() -> str:
+    token = os.environ.get("TELEGRAM_BOT_HTTP_API_TOKEN", "").strip()
+    if token:
+        return token
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    if token:
+        return token
+    raise SystemExit("Missing required environment variable: TELEGRAM_BOT_HTTP_API_TOKEN")
+
+
+def save_allowed_chat_id(env_path: Path, chat_id: int) -> None:
+    key = "TELEGRAM_ALLOWED_CHAT_IDS"
+    lines = []
+    found = False
+    if env_path.exists():
+        lines = env_path.read_text(encoding="utf-8").splitlines()
+
+    for index, line in enumerate(lines):
+        if line.strip().startswith(f"{key}="):
+            lines[index] = f"{key}={chat_id}"
+            found = True
+            break
+
+    if not found:
+        lines.append(f"{key}={chat_id}")
+
+    env_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    os.environ[key] = str(chat_id)
 
 
 def api_call(token: str, method: str, payload: dict) -> dict:
@@ -129,13 +160,13 @@ def extract_message(update: dict) -> tuple[int, str] | None:
 
 
 def main() -> int:
-    load_dotenv(Path(".env"))
-    token = required_env("TELEGRAM_BOT_TOKEN")
+    load_dotenv(ENV_PATH)
+    token = telegram_token()
     allowlist = allowed_chat_ids()
 
     print("Telegram Codex bridge is running.", flush=True)
     if not allowlist:
-        print("No TELEGRAM_ALLOWED_CHAT_IDS set. Setup mode is active.", flush=True)
+        print("No TELEGRAM_ALLOWED_CHAT_IDS set. First incoming chat will be allowed.", flush=True)
 
     offset = None
     while True:
@@ -152,12 +183,13 @@ def main() -> int:
                 chat_id, text = extracted
 
                 if not allowlist:
+                    save_allowed_chat_id(ENV_PATH, chat_id)
+                    allowlist = {chat_id}
                     send_message(
                         token,
                         chat_id,
-                        f"Setup mode: your chat ID is {chat_id}. Add it to TELEGRAM_ALLOWED_CHAT_IDS.",
+                        f"This chat is now allowed for Telegram Codex. Chat ID: {chat_id}",
                     )
-                    continue
 
                 if chat_id not in allowlist:
                     send_message(token, chat_id, "This chat is not authorized for this bot.")
@@ -176,4 +208,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

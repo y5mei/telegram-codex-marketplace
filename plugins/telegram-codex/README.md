@@ -18,9 +18,8 @@ cp scripts/env.example .env
 python3 scripts/telegram_codex_bridge.py
 ```
 
-On first run, leave `TELEGRAM_ALLOWED_CHAT_IDS` empty, send a message to your bot, copy the chat ID from the reply into `.env`, then restart the bridge.
+On first run, set only `TELEGRAM_BOT_HTTP_API_TOKEN`, then send a message to your bot. The first chat to message the bot is written into `.env` as `TELEGRAM_ALLOWED_CHAT_IDS`.
 
 ## Security
 
 Keep `CODEX_SANDBOX=workspace-write` or `CODEX_SANDBOX=read-only` unless you intentionally want Telegram prompts to drive broad local filesystem actions.
-
