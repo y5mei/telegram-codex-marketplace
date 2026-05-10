@@ -57,6 +57,15 @@ Use:
 
 If the user sends `/stop` to the Telegram bot while the bridge is running, the bot sends a restart hint and exits. If the bridge is already stopped, Telegram cannot send a local notification because no local process is polling Telegram.
 
+By default, the bridge checks every 5 minutes whether Codex is still running. If Codex is gone, the bridge exits cleanly. The `.env` controls this:
+
+```env
+CODEX_WATCHDOG_ENABLED=true
+CODEX_WATCHDOG_INTERVAL_SECONDS=300
+```
+
+Set `CODEX_WATCHDOG_ENABLED=false` only if the user intentionally wants the bridge to outlive Codex.
+
 ## Security Guidance
 
 - Prefer `CODEX_SANDBOX=workspace-write` for normal use.

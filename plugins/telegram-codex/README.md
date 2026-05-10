@@ -59,6 +59,13 @@ Use these commands after setup:
 
 The bridge is long-running. Installing the plugin does not automatically start it. If the bridge is stopped, Telegram cannot receive a local reply because no process is polling Telegram.
 
+By default, the bridge checks every 5 minutes whether Codex is still running. If Codex is gone, the bridge exits cleanly. Configure this in `.env`:
+
+```env
+CODEX_WATCHDOG_ENABLED=true
+CODEX_WATCHDOG_INTERVAL_SECONDS=300
+```
+
 ## Security
 
 Keep `CODEX_SANDBOX=workspace-write` or `CODEX_SANDBOX=read-only` unless the user intentionally wants Telegram prompts to drive broad local filesystem actions.

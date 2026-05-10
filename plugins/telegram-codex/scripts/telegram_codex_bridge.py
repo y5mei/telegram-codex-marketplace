@@ -23,6 +23,9 @@ OFFLINE_MESSAGE = (
     "Telegram Codex bridge is not running. In Codex, type /telegram_plugin start "
     "or reopen Codex and ask it to start the Telegram plugin."
 )
+CODEX_WATCHDOG_ENABLED = "CODEX_WATCHDOG_ENABLED"
+CODEX_WATCHDOG_INTERVAL_SECONDS = "CODEX_WATCHDOG_INTERVAL_SECONDS"
+CODEX_WATCHDOG_PATTERNS = "CODEX_WATCHDOG_PATTERNS"
 
 
 def load_dotenv(path: Path) -> None:
@@ -173,6 +176,65 @@ def should_stop(text: str) -> bool:
     return text.strip().lower() in {"/stop", "/offline", "/pause"}
 
 
+def bool_env(name: str, default: bool) -> bool:
+    raw = os.environ.get(name, "").strip().lower()
+    if not raw:
+        return default
+    return raw not in {"0", "false", "no", "off"}
+
+
+def codex_process_patterns() -> list[str]:
+    raw = os.environ.get(CODEX_WATCHDOG_PATTERNS, "").strip()
+    if raw:
+        return [part.strip().lower() for part in raw.split(",") if part.strip()]
+    return [
+        "/applications/codex.app/contents/macos/codex",
+        "/applications/codex.app/contents/resources/codex app-server",
+        "codex app-server",
+    ]
+
+
+def codex_is_alive() -> bool:
+    result = subprocess.run(
+        ["ps", "-axo", "pid,args"],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if result.returncode != 0:
+        return True
+
+    self_pid = os.getpid()
+    parent_pid = os.getppid()
+    patterns = codex_process_patterns()
+    for line in result.stdout.splitlines()[1:]:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        pid_text, _, args = stripped.partition(" ")
+        try:
+            pid = int(pid_text)
+        except ValueError:
+            continue
+        if pid in {self_pid, parent_pid}:
+            continue
+        lowered = args.lower()
+        if "telegram_codex_bridge.py" in lowered or "telegram_plugin_control.py" in lowered:
+            continue
+        if any(pattern in lowered for pattern in patterns):
+            return True
+    return False
+
+
+def watchdog_interval_seconds() -> int:
+    raw = os.environ.get(CODEX_WATCHDOG_INTERVAL_SECONDS, "300").strip()
+    try:
+        return max(30, int(raw))
+    except ValueError:
+        return 300
+
+
 def extract_message(update: dict) -> tuple[int, str] | None:
     message = update.get("message") or update.get("edited_message")
     if not message:
@@ -195,7 +257,16 @@ def main() -> int:
         print("No TELEGRAM_ALLOWED_CHAT_IDS set. First incoming chat will be allowed.", flush=True)
 
     offset = None
+    watchdog_enabled = bool_env(CODEX_WATCHDOG_ENABLED, True)
+    watchdog_interval = watchdog_interval_seconds()
+    next_watchdog_check = time.monotonic() + watchdog_interval
     while True:
+        if watchdog_enabled and time.monotonic() >= next_watchdog_check:
+            if not codex_is_alive():
+                print("Codex is not running; Telegram Codex bridge is exiting.", flush=True)
+                return 0
+            next_watchdog_check = time.monotonic() + watchdog_interval
+
         payload = {"timeout": "60", "allowed_updates": json.dumps(["message", "edited_message"])}
         if offset is not None:
             payload["offset"] = str(offset)

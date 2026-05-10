@@ -146,6 +146,15 @@ Telegram Codex bridge is not running. In Codex, type /telegram_plugin start or r
 
 Then it stops itself. If the bridge is fully stopped or Codex/computer is offline, Telegram cannot receive a local reply because no process is polling Telegram. In that case the user should reopen Codex and type `/telegram_plugin start`.
 
+The bridge also has a watchdog. By default it checks every 5 minutes whether Codex is still running. If Codex is gone, the bridge exits cleanly. Configure this in `.env`:
+
+```env
+CODEX_WATCHDOG_ENABLED=true
+CODEX_WATCHDOG_INTERVAL_SECONDS=300
+```
+
+Set `CODEX_WATCHDOG_ENABLED=false` only if the user intentionally wants the Telegram bridge to outlive Codex.
+
 ## Troubleshooting For Agents
 
 - If Python raises a certificate verification error when calling Telegram, the bridge falls back to `curl`.
@@ -153,6 +162,7 @@ Then it stops itself. If the bridge is fully stopped or Codex/computer is offlin
 - If Codex reports an unsupported CLI flag, upgrade the marketplace and restart the bridge.
 - If `.env` is missing, recreate it from `scripts/env.example`.
 - If the bridge is stopped, run `/telegram_plugin start`.
+- If the bridge exits after Codex closes, that is expected watchdog behavior.
 
 ## Security
 
