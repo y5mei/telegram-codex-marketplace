@@ -22,10 +22,11 @@ Use this skill to set up Telegram Codex. Keep user-facing output short.
    find ~/.codex -path '*/plugins/telegram-codex' -type d 2>/dev/null
    ```
 
-3. Create `.env` if missing:
+3. Create stable `.env` if missing:
 
    ```sh
-   cp -n scripts/env.example .env
+   mkdir -p ~/.codex/telegram-codex
+   cp -n scripts/env.example ~/.codex/telegram-codex/.env
    ```
 
 4. Ask user to get the Telegram token:
@@ -48,9 +49,11 @@ Use this skill to set up Telegram Codex. Keep user-facing output short.
    telegram-codex:start
    telegram-codex:stop
    telegram-codex:status
+   telegram-codex:logs
    ```
 
 8. Mention once: the bridge checks every 5 minutes whether Codex is still running and exits automatically if Codex is gone.
+9. Mention once: Telegram messages are sent to local Codex and may trigger local file actions depending on `CODEX_SANDBOX`.
 
 ## First Test
 
@@ -70,4 +73,4 @@ Hello world from Codex Telegram plugin.
 - Telegram replies must use Bot API HTML parse mode, not Markdown.
 - Use only supported HTML tags such as `<b>`, `<i>`, `<u>`, `<s>`, `<a href="...">`, `<code>`, and `<pre>`.
 - Escape literal `<`, `>`, and `&` in Telegram replies.
-- Use `telegram-codex:start`, `telegram-codex:stop`, and `telegram-codex:status` instead of slash commands.
+- Use `telegram-codex:start`, `telegram-codex:stop`, `telegram-codex:status`, and `telegram-codex:logs` instead of slash commands.

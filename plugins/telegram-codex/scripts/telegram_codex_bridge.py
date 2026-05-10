@@ -8,6 +8,7 @@ import os
 import shlex
 import subprocess
 import sys
+import threading
 import tempfile
 import time
 import urllib.error
@@ -18,7 +19,8 @@ from pathlib import Path
 
 
 TELEGRAM_LIMIT = 3900
-ENV_PATH = Path(".env")
+CONFIG_DIR = Path.home() / ".codex" / "telegram-codex"
+ENV_PATH = CONFIG_DIR / ".env"
 WELCOME_MESSAGE = "Hello world from Codex Telegram plugin."
 OFFLINE_MESSAGE = (
     "Telegram Codex bridge is not running. In Codex, select telegram-codex:start "
@@ -27,6 +29,7 @@ OFFLINE_MESSAGE = (
 CODEX_WATCHDOG_ENABLED = "CODEX_WATCHDOG_ENABLED"
 CODEX_WATCHDOG_INTERVAL_SECONDS = "CODEX_WATCHDOG_INTERVAL_SECONDS"
 CODEX_WATCHDOG_PATTERNS = "CODEX_WATCHDOG_PATTERNS"
+WORKING_DELAY_SECONDS = "TELEGRAM_WORKING_DELAY_SECONDS"
 
 
 def load_dotenv(path: Path) -> None:
@@ -75,6 +78,7 @@ def save_allowed_chat_id(env_path: Path, chat_id: int) -> None:
     if not found:
         lines.append(f"{key}={chat_id}")
 
+    env_path.parent.mkdir(parents=True, exist_ok=True)
     env_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     os.environ[key] = str(chat_id)
 
@@ -106,7 +110,7 @@ def curl_api_call(token: str, method: str, payload: dict) -> dict:
 
 
 def send_message(token: str, chat_id: int, text: str) -> None:
-    chunks = [text[i : i + TELEGRAM_LIMIT] for i in range(0, len(text), TELEGRAM_LIMIT)]
+    chunks = html_chunks(text, TELEGRAM_LIMIT)
     for chunk in chunks or [""]:
         payload = {
             "chat_id": str(chat_id),
@@ -123,6 +127,34 @@ def send_message(token: str, chat_id: int, text: str) -> None:
             api_call(token, "sendMessage", payload)
 
 
+def html_chunks(text: str, limit: int) -> list[str]:
+    if not text:
+        return [""]
+
+    if len(text) > limit:
+        text = escape(text)
+
+    chunks: list[str] = []
+    remaining = text
+    while len(remaining) > limit:
+        split_at = max(remaining.rfind("\n", 0, limit), remaining.rfind(" ", 0, limit))
+        if split_at < limit // 2:
+            split_at = limit
+        chunk = remaining[:split_at].rstrip()
+        if has_unbalanced_html_brackets(chunk):
+            chunk = escape(chunk)
+        chunks.append(chunk)
+        remaining = remaining[split_at:].lstrip()
+    if has_unbalanced_html_brackets(remaining):
+        remaining = escape(remaining)
+    chunks.append(remaining)
+    return chunks
+
+
+def has_unbalanced_html_brackets(text: str) -> bool:
+    return text.count("<") != text.count(">")
+
+
 def allowed_chat_ids() -> set[int]:
     raw = os.environ.get("TELEGRAM_ALLOWED_CHAT_IDS", "").strip()
     if not raw:
@@ -132,7 +164,7 @@ def allowed_chat_ids() -> set[int]:
 
 def build_codex_command() -> list[str]:
     codex_bin = os.environ.get("CODEX_BIN", "codex")
-    workdir = os.environ.get("CODEX_WORKDIR", os.getcwd())
+    workdir = os.environ.get("CODEX_WORKDIR", "").strip() or str(Path.home())
     sandbox = os.environ.get("CODEX_SANDBOX", "workspace-write")
     model = os.environ.get("CODEX_MODEL", "").strip()
 
@@ -178,6 +210,29 @@ def run_codex(prompt: str) -> str:
         cli_output = result.stdout.strip()
         return f"Codex exited with status {result.returncode}.\n\n{cli_output[-1200:]}"
     return output or "Codex finished without a text reply."
+
+
+def working_delay_seconds() -> float:
+    raw = os.environ.get(WORKING_DELAY_SECONDS, "2").strip()
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        return 2.0
+
+
+def run_codex_with_delayed_working_message(token: str, chat_id: int, prompt: str) -> str:
+    done = threading.Event()
+
+    def send_if_slow() -> None:
+        if not done.wait(working_delay_seconds()):
+            send_message(token, chat_id, "Working on it...")
+
+    worker = threading.Thread(target=send_if_slow, daemon=True)
+    worker.start()
+    try:
+        return run_codex(prompt)
+    finally:
+        done.set()
 
 
 def should_stop(text: str) -> bool:
@@ -256,6 +311,7 @@ def extract_message(update: dict) -> tuple[int, str] | None:
 
 
 def main() -> int:
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     load_dotenv(ENV_PATH)
     token = telegram_token()
     allowlist = allowed_chat_ids()
@@ -302,8 +358,7 @@ def main() -> int:
                     return 0
 
                 print(f"Running Codex for chat {chat_id}: {shlex.quote(text[:80])}", flush=True)
-                send_message(token, chat_id, "Working on it...")
-                reply = run_codex(text)
+                reply = run_codex_with_delayed_working_message(token, chat_id, text)
                 send_message(token, chat_id, reply)
         except subprocess.TimeoutExpired:
             print("Codex request timed out.", file=sys.stderr, flush=True)

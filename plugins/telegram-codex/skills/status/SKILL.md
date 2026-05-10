@@ -17,7 +17,8 @@ Use this skill when the user selects `telegram-codex:status` or asks whether the
    python3 scripts/telegram_plugin_control.py status
    ```
 
-3. If stopped, offer to start it with `telegram-codex:start`.
+3. Report only key fields: running/stopped, token configured, Telegram API reachable, webhook clear/set, allowed chat, watchdog, and log path.
+4. If stopped, offer to start it with `telegram-codex:start`.
 
 The status command also clears stale PID files left by crashed bridge processes.
 

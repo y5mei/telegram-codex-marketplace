@@ -1,5 +1,5 @@
 ---
-description: Start, stop, or inspect the Telegram Codex bridge. Usage: /telegram_plugin start|stop|status
+description: Start, stop, inspect, or show logs for the Telegram Codex bridge. Usage: /telegram_plugin start|stop|status|logs
 ---
 
 # /telegram_plugin
@@ -8,7 +8,7 @@ Manage the long-running Telegram Codex bridge.
 
 ## Arguments
 
-- `action`: `start`, `stop`, or `status`
+- `action`: `start`, `stop`, `status`, or `logs`
 
 ## Workflow
 
@@ -36,5 +36,10 @@ Manage the long-running Telegram Codex bridge.
    python3 scripts/telegram_plugin_control.py status
    ```
 
-5. If no action is provided, show the three supported actions and recommend `/telegram_plugin status`.
+5. If the user wrote `/telegram_plugin logs`, run from the plugin root:
 
+   ```sh
+   python3 scripts/telegram_plugin_control.py logs --lines 20
+   ```
+
+6. If no action is provided, show the supported actions and recommend `/telegram_plugin status`.

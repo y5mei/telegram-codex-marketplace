@@ -20,7 +20,7 @@ Start the long-running Telegram Codex bridge.
    python3 scripts/telegram_plugin_control.py start
    ```
 
-3. If `.env` was created and the command asks for `TELEGRAM_BOT_HTTP_API_TOKEN`, guide the user through `@BotFather` setup from the README, have them add the token to `.env`, then run the start command again.
+3. If config was created and the command asks for `TELEGRAM_BOT_HTTP_API_TOKEN`, guide the user through `@BotFather` setup from the README, have them add the token to `~/.codex/telegram-codex/.env`, then run the start command again.
 4. Tell the user to send a Telegram message to the bot.
 5. On first claim, expect:
 
@@ -29,4 +29,3 @@ Start the long-running Telegram Codex bridge.
    ```
 
 6. Ask the user to send a second message to verify Codex replies.
-

@@ -37,10 +37,11 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
    find ~/.codex -path '*/plugins/telegram-codex' -type d 2>/dev/null
    ```
 
-4. Create `.env` if missing:
+4. Create stable `.env` if missing:
 
    ```sh
-   cp -n scripts/env.example .env
+   mkdir -p ~/.codex/telegram-codex
+   cp -n scripts/env.example ~/.codex/telegram-codex/.env
    ```
 
 5. Ask the user to get a Telegram HTTP API token:
@@ -49,7 +50,7 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
    Open Telegram, chat with @BotFather, send /newbot, choose a bot name and a username ending in bot, then copy the HTTP API token.
    ```
 
-6. Help the user put the token in `.env`:
+6. Help the user put the token in `~/.codex/telegram-codex/.env`:
 
    ```env
    TELEGRAM_BOT_HTTP_API_TOKEN=the_token_from_botfather
@@ -63,12 +64,19 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
    telegram-codex:start
    telegram-codex:stop
    telegram-codex:status
+   telegram-codex:logs
    ```
 
 9. Mention the watchdog once:
 
    ```text
    The bridge checks every 5 minutes whether Codex is still running and exits automatically if Codex is gone.
+   ```
+
+10. Mention privacy once:
+
+   ```text
+   Telegram messages will be sent to local Codex and may trigger local file actions depending on the configured sandbox.
    ```
 
 ## First Test
@@ -92,5 +100,5 @@ Then ask them to send one normal message to confirm Codex replies.
 - Telegram replies must use Telegram Bot API HTML formatting, not Markdown.
 - Supported HTML includes `<b>`, `<i>`, `<u>`, `<s>`, `<a href="...">`, `<code>`, and `<pre>`.
 - Escape literal `<`, `>`, and `&` in Telegram replies.
-- If `.env` is missing, recreate it from `scripts/env.example`.
+- If config is missing, recreate `~/.codex/telegram-codex/.env` from `scripts/env.example`.
 - If the bridge is stopped, use `telegram-codex:start`.

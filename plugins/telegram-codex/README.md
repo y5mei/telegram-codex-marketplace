@@ -10,10 +10,11 @@ For Codex agents: keep setup concise.
    find ~/.codex -path '*/plugins/telegram-codex' -type d 2>/dev/null
    ```
 
-2. Create `.env` if missing:
+2. Create stable `.env` if missing:
 
    ```sh
-   cp -n scripts/env.example .env
+   mkdir -p ~/.codex/telegram-codex
+   cp -n scripts/env.example ~/.codex/telegram-codex/.env
    ```
 
 3. Ask user to get the token:
@@ -36,9 +37,12 @@ For Codex agents: keep setup concise.
    telegram-codex:start
    telegram-codex:stop
    telegram-codex:status
+   telegram-codex:logs
    ```
 
 The bridge auto-exits if Codex is gone for the 5-minute watchdog check.
+
+Privacy note: Telegram messages are sent to local Codex and may trigger local file actions depending on `CODEX_SANDBOX`.
 
 ## Reply Formatting
 
