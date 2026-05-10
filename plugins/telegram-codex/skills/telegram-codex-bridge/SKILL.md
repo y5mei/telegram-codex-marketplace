@@ -5,7 +5,7 @@ description: Set up and run a local Telegram Bot API bridge that forwards allowl
 
 # Telegram Codex Bridge
 
-Use this skill when the user wants to chat with Codex through Telegram, configure the Telegram bridge, run it locally, or harden its security settings.
+Use this skill when the user wants to chat with Codex through Telegram, configure the Telegram bridge, run it locally, or harden its security settings. The reader is another Codex agent: actively guide the user through setup instead of only summarizing instructions.
 
 ## What This Plugin Provides
 
@@ -17,17 +17,25 @@ Use this skill when the user wants to chat with Codex through Telegram, configur
 ## Setup Workflow
 
 1. Resolve the plugin root from this skill directory: `../..`.
-2. Copy `scripts/env.example` to `.env` in the plugin root if `.env` does not exist.
-3. Ask the user to put their Telegram bot token in `.env` as `TELEGRAM_BOT_HTTP_API_TOKEN`.
-4. Start the bridge with:
+2. Ask the user to install or open the Telegram app.
+3. Ask the user to search for and open `@BotFather`.
+4. Ask the user to send `/newbot`.
+5. Guide the user through BotFather's prompts:
+   - Choose a display name for the bot.
+   - Choose a username for the bot. Telegram bot usernames must end in `bot`.
+6. BotFather will provide an HTTP API token. Tell the user this token is secret.
+7. Copy `scripts/env.example` to `.env` in the plugin root if `.env` does not exist.
+8. Help the user put the token into `.env` as `TELEGRAM_BOT_HTTP_API_TOKEN`.
+9. Start the bridge with:
 
    ```sh
    cd <plugin-root>
    python3 scripts/telegram_codex_bridge.py
    ```
 
-5. Tell the user to message the Telegram bot.
-6. The first chat to message the bot is written to `.env` as `TELEGRAM_ALLOWED_CHAT_IDS`.
+10. Tell the user to message the Telegram bot.
+11. The first chat to message the bot is written to `.env` as `TELEGRAM_ALLOWED_CHAT_IDS`.
+12. Ask the user to send a second message and verify that Codex replies.
 
 ## Security Guidance
 
@@ -36,7 +44,7 @@ Use this skill when the user wants to chat with Codex through Telegram, configur
 - Use `CODEX_SANDBOX=danger-full-access` only when the user explicitly wants Telegram to drive broad local filesystem work.
 - On first run, the bridge automatically writes the first incoming chat to `TELEGRAM_ALLOWED_CHAT_IDS`.
 - For shared bot tokens, pre-fill `TELEGRAM_ALLOWED_CHAT_IDS` before starting the bridge.
-- Do not ask the user to paste their bot token into chat; have them edit `.env` locally.
+- Do not ask the user to paste their bot token into chat unless they explicitly ask you to edit the config for them; prefer helping them edit `.env` locally.
 
 ## Operation
 
