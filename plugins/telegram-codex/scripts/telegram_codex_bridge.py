@@ -8,6 +8,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -17,6 +18,7 @@ from pathlib import Path
 
 TELEGRAM_LIMIT = 3900
 ENV_PATH = Path(".env")
+WELCOME_MESSAGE = "Hello world from Codex Telegram plugin."
 
 
 def load_dotenv(path: Path) -> None:
@@ -79,7 +81,20 @@ def api_call(token: str, method: str, payload: dict) -> dict:
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"Telegram HTTP {exc.code}: {body}") from exc
+    except urllib.error.URLError:
+        return curl_api_call(token, method, payload)
     return json.loads(body)
+
+
+def curl_api_call(token: str, method: str, payload: dict) -> dict:
+    url = f"https://api.telegram.org/bot{token}/{method}"
+    args = ["curl", "--silent", "--show-error", "--fail", "--max-time", "90", "-X", "POST", url]
+    for key, value in payload.items():
+        args.extend(["--data-urlencode", f"{key}={value}"])
+    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(f"Telegram curl failed: {result.stderr.strip()}")
+    return json.loads(result.stdout)
 
 
 def send_message(token: str, chat_id: int, text: str) -> None:
@@ -116,8 +131,6 @@ def build_codex_command() -> list[str]:
         workdir,
         "--sandbox",
         sandbox,
-        "--ask-for-approval",
-        "never",
         "--skip-git-repo-check",
     ]
     if model:
@@ -132,18 +145,23 @@ def run_codex(prompt: str) -> str:
         "You are replying to the user through Telegram. Keep the answer concise "
         "unless the user asks for detail. Do not mention Telegram unless relevant.\n\n"
     )
-    result = subprocess.run(
-        build_codex_command(),
-        input=system_hint + prompt,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        timeout=timeout,
-        check=False,
-    )
-    output = result.stdout.strip()
+    with tempfile.NamedTemporaryFile("r+", encoding="utf-8", delete=True) as final_message:
+        cmd = build_codex_command()
+        cmd[2:2] = ["--output-last-message", final_message.name]
+        result = subprocess.run(
+            cmd,
+            input=system_hint + prompt,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=timeout,
+            check=False,
+        )
+        final_message.seek(0)
+        output = final_message.read().strip()
     if result.returncode != 0:
-        return f"Codex exited with status {result.returncode}.\n\n{output[-3000:]}"
+        cli_output = result.stdout.strip()
+        return f"Codex exited with status {result.returncode}.\n\n{cli_output[-1200:]}"
     return output or "Codex finished without a text reply."
 
 
@@ -185,11 +203,8 @@ def main() -> int:
                 if not allowlist:
                     save_allowed_chat_id(ENV_PATH, chat_id)
                     allowlist = {chat_id}
-                    send_message(
-                        token,
-                        chat_id,
-                        f"This chat is now allowed for Telegram Codex. Chat ID: {chat_id}",
-                    )
+                    send_message(token, chat_id, WELCOME_MESSAGE)
+                    continue
 
                 if chat_id not in allowlist:
                     send_message(token, chat_id, "This chat is not authorized for this bot.")

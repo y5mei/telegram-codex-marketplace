@@ -4,6 +4,14 @@ This plugin packages a local bridge between Telegram Bot API and Codex CLI.
 
 This README is for Codex agents helping a user set up the bridge. Stay with the user through bot creation, token placement, bridge startup, and the first message test.
 
+## User Copy-Paste Prompt
+
+Tell users to send this to Codex:
+
+```text
+Please read this link and install the Telegram Codex plugin, then guide me through setup: https://github.com/y5mei/telegram-codex-marketplace
+```
+
 ## What The Bridge Does
 
 The bridge uses Telegram long polling, so it does not need a public webhook URL. Incoming text messages from the user's allowed Telegram chat are passed to `codex exec`; the final Codex response is sent back to the same Telegram chat.
@@ -36,7 +44,7 @@ The bridge uses Telegram long polling, so it does not need a public webhook URL.
    ```
 
 10. Ask the user to message their new Telegram bot.
-11. Confirm the first message causes the bridge to write `TELEGRAM_ALLOWED_CHAT_IDS` into `.env`.
+11. Confirm the first message causes the bridge to write `TELEGRAM_ALLOWED_CHAT_IDS` into `.env` and reply `Hello world from Codex Telegram plugin.`
 12. Ask the user to send a second message and verify that Codex replies.
 
 ## Security

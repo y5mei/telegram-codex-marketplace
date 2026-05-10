@@ -7,6 +7,12 @@ description: Set up and run a local Telegram Bot API bridge that forwards allowl
 
 Use this skill when the user wants to chat with Codex through Telegram, configure the Telegram bridge, run it locally, or harden its security settings. The reader is another Codex agent: actively guide the user through setup instead of only summarizing instructions.
 
+If a user needs a starting prompt, tell them to send Codex:
+
+```text
+Please read this link and install the Telegram Codex plugin, then guide me through setup: https://github.com/y5mei/telegram-codex-marketplace
+```
+
 ## What This Plugin Provides
 
 - A long-polling Telegram bot service in `../../scripts/telegram_codex_bridge.py`.
@@ -35,6 +41,7 @@ Use this skill when the user wants to chat with Codex through Telegram, configur
 
 10. Tell the user to message the Telegram bot.
 11. The first chat to message the bot is written to `.env` as `TELEGRAM_ALLOWED_CHAT_IDS`.
+    The expected first Telegram reply is `Hello world from Codex Telegram plugin.`
 12. Ask the user to send a second message and verify that Codex replies.
 
 ## Security Guidance

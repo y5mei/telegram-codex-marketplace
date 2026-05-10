@@ -4,6 +4,16 @@ This repository is a Codex plugin marketplace containing `telegram-codex`, a loc
 
 This README is written for Codex agents. When a user asks to use this plugin, do not only point them at these instructions. Help them complete the setup.
 
+## User Copy-Paste Prompt
+
+Tell users to send this to Codex:
+
+```text
+Please read this link and install the Telegram Codex plugin, then guide me through setup: https://github.com/y5mei/telegram-codex-marketplace
+```
+
+Codex should then install the plugin, create the config file, guide the user through BotFather, start the bridge, and test the first Telegram message.
+
 ## Agent Goal
 
 Guide the user through:
@@ -23,7 +33,12 @@ If the marketplace is not installed yet, run:
 codex plugin marketplace add y5mei/telegram-codex-marketplace
 ```
 
-After installing the marketplace, help the user enable the `telegram-codex` plugin in Codex if needed.
+After installing the marketplace, ensure the plugin is enabled. If Codex has not added an enabled plugin entry automatically, add this to `~/.codex/config.toml`:
+
+```toml
+[plugins."telegram-codex@telegram-codex-marketplace"]
+enabled = true
+```
 
 ## Help The User Create A Telegram Bot
 
@@ -46,7 +61,7 @@ Do not ask the user to paste the token into chat unless they explicitly want you
 
 ## Configure The Plugin
 
-Find the installed plugin root. If you are unsure where Codex placed it, search locally:
+Find the installed plugin root:
 
 ```sh
 find ~/.codex -path '*/plugins/telegram-codex' -type d 2>/dev/null
@@ -55,7 +70,7 @@ find ~/.codex -path '*/plugins/telegram-codex' -type d 2>/dev/null
 From the plugin root:
 
 ```sh
-cp scripts/env.example .env
+cp -n scripts/env.example .env
 ```
 
 Help the user set this value in `.env`:
@@ -84,6 +99,12 @@ Then guide the user to:
    ```
 
 3. Confirm the bridge replies that the chat is now allowed.
+   The expected first reply is:
+
+   ```text
+   Hello world from Codex Telegram plugin.
+   ```
+
 4. Ask the user to send a second message that should go through Codex, for example:
 
    ```text
@@ -91,6 +112,13 @@ Then guide the user to:
    ```
 
 If the second reply comes back from Codex, setup is complete.
+
+## Troubleshooting For Agents
+
+- If Python raises a certificate verification error when calling Telegram, the bridge falls back to `curl`.
+- If Telegram receives huge Codex CLI logs, upgrade the marketplace and restart the bridge; replies should use only Codex's `--output-last-message` result.
+- If Codex reports an unsupported CLI flag, upgrade the marketplace and restart the bridge.
+- If `.env` is missing, recreate it from `scripts/env.example`.
 
 ## Security
 
