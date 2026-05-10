@@ -5,83 +5,66 @@ description: Set up and run a local Telegram Bot API bridge that forwards allowl
 
 # Telegram Codex Bridge
 
-Use this skill when the user wants to chat with Codex through Telegram, configure the Telegram bridge, run it locally, or harden its security settings. The reader is another Codex agent: actively guide the user through setup instead of only summarizing instructions.
+Use this skill to set up Telegram Codex. Keep user-facing output short.
 
-If a user needs a starting prompt, tell them to send Codex:
+## Setup
 
-```text
-Please read this link and install the Telegram Codex plugin, then guide me through setup: https://github.com/y5mei/telegram-codex-marketplace
-```
+1. Install or upgrade marketplace if needed:
 
-## What This Plugin Provides
+   ```sh
+   codex plugin marketplace add y5mei/telegram-codex-marketplace
+   codex plugin marketplace upgrade telegram-codex-marketplace
+   ```
 
-- A long-polling Telegram bot service in `../../scripts/telegram_codex_bridge.py`.
-- An environment template in `../../scripts/env.example`.
-- A Codex CLI subprocess bridge using `codex exec`.
-- A required Telegram chat allowlist.
+2. Find plugin root:
 
-## Setup Workflow
+   ```sh
+   find ~/.codex -path '*/plugins/telegram-codex' -type d 2>/dev/null
+   ```
 
-1. Resolve the plugin root from this skill directory: `../..`.
-2. Ask the user to install or open the Telegram app.
-3. Ask the user to search for and open `@BotFather`.
-4. Ask the user to send `/newbot`.
-5. Guide the user through BotFather's prompts:
-   - Choose a display name for the bot.
-   - Choose a username for the bot. Telegram bot usernames must end in `bot`.
-6. BotFather will provide an HTTP API token. Tell the user this token is secret.
-7. Copy `scripts/env.example` to `.env` in the plugin root if `.env` does not exist.
-8. Help the user put the token into `.env` as `TELEGRAM_BOT_HTTP_API_TOKEN`.
-9. Start the bridge with:
+3. Create `.env` if missing:
+
+   ```sh
+   cp -n scripts/env.example .env
+   ```
+
+4. Ask user to get the Telegram token:
+
+   ```text
+   Open Telegram, chat with @BotFather, send /newbot, choose a bot name and a username ending in bot, then copy the HTTP API token.
+   ```
+
+5. Help user put it in `.env`:
+
+   ```env
+   TELEGRAM_BOT_HTTP_API_TOKEN=the_token_from_botfather
+   ```
+
+6. Tell user to restart Codex so skills refresh.
+
+7. Show controls:
 
    ```text
    telegram-codex:start
+   telegram-codex:stop
+   telegram-codex:status
    ```
 
-10. Tell the user to message the Telegram bot.
-11. The first chat to message the bot is written to `.env` as `TELEGRAM_ALLOWED_CHAT_IDS`.
-    The expected first Telegram reply is `Hello world from Codex Telegram plugin.`
-12. Ask the user to send a second message and verify that Codex replies.
+8. Mention once: the bridge checks every 5 minutes whether Codex is still running and exits automatically if Codex is gone.
 
-## Lifecycle Commands
+## First Test
 
-The bridge is a long-running local process. Installing the plugin does not automatically start it, and there is no reliable plugin lifecycle hook here for "start with Codex" or "stop with Codex".
+After restart, tell the user to select `telegram-codex:start`, then message the Telegram bot.
 
-Use:
+Expected first Telegram reply:
 
 ```text
-telegram-codex:start
-telegram-codex:stop
-telegram-codex:status
+Hello world from Codex Telegram plugin.
 ```
 
-If the user sends `/stop` to the Telegram bot while the bridge is running, the bot sends a restart hint and exits. If the bridge is already stopped, Telegram cannot send a local notification because no local process is polling Telegram.
+## Guardrails
 
-By default, the bridge checks every 5 minutes whether Codex is still running. If Codex is gone, the bridge exits cleanly. The `.env` controls this:
-
-```env
-CODEX_WATCHDOG_ENABLED=true
-CODEX_WATCHDOG_INTERVAL_SECONDS=300
-```
-
-Set `CODEX_WATCHDOG_ENABLED=false` only if the user intentionally wants the bridge to outlive Codex.
-
-## Security Guidance
-
-- Prefer `CODEX_SANDBOX=workspace-write` for normal use.
-- Use `CODEX_SANDBOX=read-only` for Q&A-only bots.
-- Use `CODEX_SANDBOX=danger-full-access` only when the user explicitly wants Telegram to drive broad local filesystem work.
-- On first run, the bridge automatically writes the first incoming chat to `TELEGRAM_ALLOWED_CHAT_IDS`.
-- For shared bot tokens, pre-fill `TELEGRAM_ALLOWED_CHAT_IDS` before starting the bridge.
-- Do not ask the user to paste their bot token into chat unless they explicitly ask you to edit the config for them; prefer helping them edit `.env` locally.
-
-## Operation
-
-Run:
-
-```sh
-cd <plugin-root>
-python3 scripts/telegram_codex_bridge.py
-```
-
-The terminal must stay open while the user wants the bridge online.
+- Do not print the token.
+- Do not over-explain.
+- Prefer editing `.env` locally over asking the user to paste secrets into chat.
+- Use `telegram-codex:start`, `telegram-codex:stop`, and `telegram-codex:status` instead of slash commands.
