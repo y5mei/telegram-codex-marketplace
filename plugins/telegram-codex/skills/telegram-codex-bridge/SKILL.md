@@ -35,7 +35,7 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
 9. Start the bridge with:
 
    ```text
-   /telegram_plugin start
+   telegram-codex:start
    ```
 
 10. Tell the user to message the Telegram bot.
@@ -50,9 +50,9 @@ The bridge is a long-running local process. Installing the plugin does not autom
 Use:
 
 ```text
-/telegram_plugin start
-/telegram_plugin stop
-/telegram_plugin status
+telegram-codex:start
+telegram-codex:stop
+telegram-codex:status
 ```
 
 If the user sends `/stop` to the Telegram bot while the bridge is running, the bot sends a restart hint and exits. If the bridge is already stopped, Telegram cannot send a local notification because no local process is polling Telegram.

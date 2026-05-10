@@ -20,7 +20,7 @@ TELEGRAM_LIMIT = 3900
 ENV_PATH = Path(".env")
 WELCOME_MESSAGE = "Hello world from Codex Telegram plugin."
 OFFLINE_MESSAGE = (
-    "Telegram Codex bridge is not running. In Codex, type /telegram_plugin start "
+    "Telegram Codex bridge is not running. In Codex, select telegram-codex:start "
     "or reopen Codex and ask it to start the Telegram plugin."
 )
 CODEX_WATCHDOG_ENABLED = "CODEX_WATCHDOG_ENABLED"
