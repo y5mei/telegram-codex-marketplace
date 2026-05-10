@@ -1,7 +1,7 @@
 {
-  "name": "local-codex-plugins",
+  "name": "telegram-codex-marketplace",
   "interface": {
-    "displayName": "Local Codex Plugins"
+    "displayName": "Telegram Codex Marketplace"
   },
   "plugins": [
     {
