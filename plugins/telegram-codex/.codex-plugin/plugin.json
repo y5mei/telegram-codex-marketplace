@@ -1,6 +1,6 @@
 {
   "name": "telegram-codex",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Run a local Telegram bot bridge that forwards messages to Codex CLI and replies in Telegram.",
   "author": {
     "name": "y5mei",

@@ -19,6 +19,8 @@ Use this skill when the user selects `telegram-codex:status` or asks whether the
 
 3. If stopped, offer to start it with `telegram-codex:start`.
 
+The status command also clears stale PID files left by crashed bridge processes.
+
 ## Reply Formatting
 
 When replying through Telegram, use Telegram Bot API HTML formatting, not Markdown.
