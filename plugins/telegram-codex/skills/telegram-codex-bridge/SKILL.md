@@ -67,4 +67,7 @@ Hello world from Codex Telegram plugin.
 - Do not print the token.
 - Do not over-explain.
 - Prefer editing `.env` locally over asking the user to paste secrets into chat.
+- Telegram replies must use Bot API HTML parse mode, not Markdown.
+- Use only supported HTML tags such as `<b>`, `<i>`, `<u>`, `<s>`, `<a href="...">`, `<code>`, and `<pre>`.
+- Escape literal `<`, `>`, and `&` in Telegram replies.
 - Use `telegram-codex:start`, `telegram-codex:stop`, and `telegram-codex:status` instead of slash commands.

@@ -19,3 +19,6 @@ Use this skill when the user selects `telegram-codex:stop` or asks to stop the T
 
 3. Tell the user the bridge is stopped. Telegram messages will not be handled until they select `telegram-codex:start` or ask Codex to start the bridge again.
 
+## Reply Formatting
+
+When replying through Telegram, use Telegram Bot API HTML formatting, not Markdown.

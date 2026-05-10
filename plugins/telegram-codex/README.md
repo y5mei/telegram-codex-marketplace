@@ -40,6 +40,10 @@ For Codex agents: keep setup concise.
 
 The bridge auto-exits if Codex is gone for the 5-minute watchdog check.
 
+## Reply Formatting
+
+Telegram replies use Bot API HTML parse mode, not Markdown. Use only supported tags such as `<b>`, `<i>`, `<u>`, `<s>`, `<a href="...">`, `<code>`, and `<pre>`. Escape literal `<`, `>`, and `&`.
+
 ## Test
 
 After restart, ask user to select `telegram-codex:start`, then message the Telegram bot.

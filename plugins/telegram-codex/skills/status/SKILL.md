@@ -19,3 +19,6 @@ Use this skill when the user selects `telegram-codex:status` or asks whether the
 
 3. If stopped, offer to start it with `telegram-codex:start`.
 
+## Reply Formatting
+
+When replying through Telegram, use Telegram Bot API HTML formatting, not Markdown.

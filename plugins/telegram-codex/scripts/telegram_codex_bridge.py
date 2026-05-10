@@ -13,6 +13,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from html import escape
 from pathlib import Path
 
 
@@ -107,15 +108,19 @@ def curl_api_call(token: str, method: str, payload: dict) -> dict:
 def send_message(token: str, chat_id: int, text: str) -> None:
     chunks = [text[i : i + TELEGRAM_LIMIT] for i in range(0, len(text), TELEGRAM_LIMIT)]
     for chunk in chunks or [""]:
-        api_call(
-            token,
-            "sendMessage",
-            {
-                "chat_id": str(chat_id),
-                "text": chunk,
-                "disable_web_page_preview": "true",
-            },
-        )
+        payload = {
+            "chat_id": str(chat_id),
+            "text": chunk,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": "true",
+        }
+        try:
+            api_call(token, "sendMessage", payload)
+        except RuntimeError as exc:
+            if "can't parse entities" not in str(exc).lower():
+                raise
+            payload["text"] = escape(chunk)
+            api_call(token, "sendMessage", payload)
 
 
 def allowed_chat_ids() -> set[int]:
@@ -149,8 +154,11 @@ def build_codex_command() -> list[str]:
 def run_codex(prompt: str) -> str:
     timeout = int(os.environ.get("CODEX_TIMEOUT_SECONDS", "600"))
     system_hint = (
-        "You are replying to the user through Telegram. Keep the answer concise "
-        "unless the user asks for detail. Do not mention Telegram unless relevant.\n\n"
+        "You are replying to the user through Telegram. Reply using Telegram Bot API HTML parse mode, "
+        "not Markdown. Keep replies concise unless the user asks for detail. "
+        "Use only Telegram-supported HTML tags such as <b>, <i>, <u>, <s>, <a href=\"...\">, "
+        "<code>, and <pre>. Escape literal <, >, and & as HTML entities. "
+        "Do not wrap the whole answer in <html> or <body>. Do not mention Telegram unless relevant.\n\n"
     )
     with tempfile.NamedTemporaryFile("r+", encoding="utf-8", delete=True) as final_message:
         cmd = build_codex_command()

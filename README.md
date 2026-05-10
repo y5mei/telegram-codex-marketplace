@@ -89,5 +89,8 @@ Then ask them to send one normal message to confirm Codex replies.
 - Do not show long explanations unless the user asks.
 - Do not print the Telegram token.
 - Do not ask the user to paste the token into chat unless they explicitly want Codex to edit `.env`.
+- Telegram replies must use Telegram Bot API HTML formatting, not Markdown.
+- Supported HTML includes `<b>`, `<i>`, `<u>`, `<s>`, `<a href="...">`, `<code>`, and `<pre>`.
+- Escape literal `<`, `>`, and `&` in Telegram replies.
 - If `.env` is missing, recreate it from `scripts/env.example`.
 - If the bridge is stopped, use `telegram-codex:start`.

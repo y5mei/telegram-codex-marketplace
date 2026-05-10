@@ -27,3 +27,6 @@ Use this skill when the user selects `telegram-codex:start` or asks to start the
 
 6. Ask the user to send a second message and verify Codex replies.
 
+## Reply Formatting
+
+When replying through Telegram, use Telegram Bot API HTML formatting, not Markdown. Use only supported tags such as `<b>`, `<i>`, `<u>`, `<s>`, `<a href="...">`, `<code>`, and `<pre>`.
