@@ -41,9 +41,14 @@ Use this skill to set up Telegram Codex. Keep user-facing output short.
    TELEGRAM_BOT_HTTP_API_TOKEN=the_token_from_botfather
    ```
 
-6. Tell user to restart Codex so skills refresh.
+6. Stop here. Ask the user to type `done` after they have updated `~/.codex/telegram-codex/.env`.
 
-7. Show controls:
+7. After the user types `done`, verify quietly that the token exists and looks valid.
+   If it does not, ask the user to fix only the token and type `done` again.
+
+8. Only after the token is verified, tell the user to restart Codex so skills refresh.
+
+9. Show controls:
 
    ```text
    telegram-codex:start
@@ -52,8 +57,8 @@ Use this skill to set up Telegram Codex. Keep user-facing output short.
    telegram-codex:logs
    ```
 
-8. Mention once: the bridge checks every 5 minutes whether Codex is still running and exits automatically if Codex is gone.
-9. Mention once: Telegram messages are sent to local Codex and may trigger local file actions depending on `CODEX_SANDBOX`.
+10. Mention once: the bridge checks every 5 minutes whether Codex is still running and exits automatically if Codex is gone.
+11. Mention once: Telegram messages are sent to local Codex and may trigger local file actions depending on `CODEX_SANDBOX`.
 
 ## First Test
 

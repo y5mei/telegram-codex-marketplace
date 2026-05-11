@@ -56,9 +56,15 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
    TELEGRAM_BOT_HTTP_API_TOKEN=the_token_from_botfather
    ```
 
-7. Tell the user to restart Codex so plugin skills refresh.
+7. Stop here.
+   Ask the user to type `done` after they have put the token in `~/.codex/telegram-codex/.env`.
 
-8. Show only these controls:
+8. After the user types `done`, verify quietly that `TELEGRAM_BOT_HTTP_API_TOKEN` exists and looks valid.
+   If it is missing or malformed, ask the user to fix only that and type `done` again.
+
+9. Only after the token is verified, tell the user to restart Codex so plugin skills refresh.
+
+10. After restart, show only these controls:
 
    ```text
    telegram-codex:start
@@ -67,13 +73,13 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
    telegram-codex:logs
    ```
 
-9. Mention the watchdog once:
+11. Mention the watchdog once:
 
    ```text
    The bridge checks every 5 minutes whether Codex is still running and exits automatically if Codex is gone.
    ```
 
-10. Mention privacy once:
+12. Mention privacy once:
 
    ```text
    Telegram messages will be sent to local Codex and may trigger local file actions depending on the configured sandbox.
@@ -81,7 +87,7 @@ Please read this link and install the Telegram Codex plugin, then guide me throu
 
 ## First Test
 
-After restart, ask the user to select `telegram-codex:start`, then message their Telegram bot.
+After restart and after the user has selected `telegram-codex:start`, ask them to message their Telegram bot.
 
 Expected first Telegram reply:
 
